@@ -13,7 +13,7 @@ exports.createProduct=async (req, res)=>{
      
 }
 
-
+//I WILL FIX IT  that deleted product show on user sitd 
 exports.fetchAllProducts = async (req, res) => {
   try {
     let query = Product.find({});
