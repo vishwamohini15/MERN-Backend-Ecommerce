@@ -15,13 +15,21 @@ exports.createProduct=async (req, res)=>{
 
 //I WILL FIX IT  that deleted product show on user sitd 
 exports.fetchAllProducts = async (req, res) => {
+  let condition = {}
+  if (!req.query.admin) {
+    condition.deleted = {$ne:true}
+  }
   try {
-    let query = Product.find({});
-
+    let query = Product.find(condition);
+    let totalProductsQuery = Product.find(condition)
     // Filtering
     if (req.query.category) {
       query = query.find({ category: req.query.category });
+      totalProductsQuery=totalProductsQuery.find({
+        category: req.query.category,
+      })
     }
+
     if (req.query.brand) {
       query = query.find({ brand: req.query.brand });
     }
