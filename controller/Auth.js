@@ -1,36 +1,46 @@
 const { User } = require("../model/User");
+const crypto = require('crypto');
+const { sanitizerUser } = require("../services/common");
+const jwt = require('jsonwebtoken');
 
-exports.createUser=async (req, res)=>{
-     //this product we have to get from  API body
-     const user= new User(req.body)
-     try{
-     const doc= await user.save()
-          res.status(201).json({id:doc.id, role:doc.role})
-     }catch(err){
-          res.status(400).json(err);
-     }
-     
-}
+const SECRET_KEY='SECRET_KEY';
+
+
+exports.createUser = async (req, res) => {
+  console.log("Received body:", req.body);
+  try {
+   const salt = crypto.randomBytes(16);
+  crypto.pbkdf2(
+    req.body.password,
+     salt, 310000,
+      32,
+       'sha256',
+        async function(err, hashedPassword) {
+  const user = new User({...req.body, password:hashedPassword, salt});
+    const doc = await user.save();
+
+    req.login(sanitizerUser(doc), (err)=>{
+      if(err){
+         res.status(400).json(err) 
+      } 
+      else{
+      const token = jwt.sign(sanitizerUser(doc), SECRET_KEY);
+    res.status(201).json(token);
+      }
+    })
+  })
+  } catch (err) {
+  }
+};
+
 
 exports.loginUser=async (req, res)=>{
-     try{
-          const user = await User.findOne(
-               {email:req.body.email},
-                ).exec()
-
-               console.log({user});
-               
-
-          if(!user){
-               res.status(401).json({message:'no such user email'})
-          }  else if(user.Password===req.body.Password){
-          res.status(200).json({id:user.id, role:user.role})
-          }else{
-          res.status(401).json({message:'invalid credentials'});
-
-          }
-     }catch(err){
-          res.status(400).json(err)
-     }
+    res.json(req.user)
      
 }
+
+exports.checkUser=async (req, res)=>{
+    res.json({status:'success', user:req.user})
+     
+}
+

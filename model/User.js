@@ -3,13 +3,12 @@ const mongoose=require('mongoose')
 const {Schema}=mongoose
 
 const UserSchema=new Schema({
-   email: {type : String, require: true, unique:true},
-   Password: {type : String, require: true},
-   role: {type : String, require: true, default:'user' },
-   addresses: {type : [Schema.Types.Mixed]},
-   name: {type: String},
-   orders: {type: [Schema.Types.Mixed]}
-
+  email: { type: String, required: true, unique: true },
+  password: { type: Buffer, required: true },
+  role: { type: String, required: true, default: 'user' },
+  addresses: { type: [Schema.Types.Mixed] },
+  name: { type: String },
+   salt : Buffer
 })
 
 const virtual = UserSchema.virtual('id')
